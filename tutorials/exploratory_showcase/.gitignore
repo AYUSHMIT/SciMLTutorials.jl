@@ -1,0 +1,30 @@
+# Julia
+Manifest.toml
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+
+# Generated outputs
+visualizations/interactive_plots/*.html
+visualizations/interactive_plots/*.json
+visualizations/animations/*.gif
+visualizations/animations/*.mp4
+visualizations/benchmark_results/*.csv
+visualizations/benchmark_results/*.txt
+visualizations/gallery_images/*.png
+visualizations/gallery_images/*.jpg
+
+# Temporary files
+*.tmp
+*.log
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db

@@ -1,0 +1,1 @@
+Placeholder for solver_heatmap.png - will be generated when tutorials are run

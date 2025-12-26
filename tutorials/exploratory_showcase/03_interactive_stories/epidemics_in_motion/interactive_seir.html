@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive SEIR Epidemic Simulator</title>
+    
+    <!-- Plotly for visualization -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <style>
+        :root {
+            --julia-purple: #9558B2;
+            --julia-green: #389826;
+            --julia-red: #CB3C33;
+            --julia-blue: #4063D8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--julia-purple), var(--julia-blue));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            height: fit-content;
+        }
+        
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--julia-purple);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .control-group input[type="range"] {
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+        
+        .control-group input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.25rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .value-display .current-value {
+            font-weight: 700;
+            color: var(--julia-purple);
+        }
+        
+        button {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--julia-purple);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #7a3d8f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(149, 88, 178, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--julia-blue);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #2d4db8;
+        }
+        
+        .btn-export {
+            background: var(--julia-green);
+            color: white;
+        }
+        
+        .btn-export:hover {
+            background: #2d7a1f;
+        }
+        
+        #plot {
+            background: white;
+            border-radius: 12px;
+            min-height: 600px;
+        }
+        
+        .metrics-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 0 2rem 2rem;
+        }
+        
+        .metric-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid var(--julia-purple);
+        }
+        
+        .metric-card.peak {
+            border-left-color: var(--julia-red);
+        }
+        
+        .metric-card.r0 {
+            border-left-color: var(--julia-blue);
+        }
+        
+        .metric-card.affected {
+            border-left-color: var(--julia-green);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--julia-purple);
+            margin: 0.5rem 0;
+        }
+        
+        .metric-label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .info-text {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+        }
+        
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦠 Interactive SEIR Epidemic Simulator</h1>
+            <p class="subtitle">Explore epidemic dynamics in real-time</p>
+        </header>
+        
+        <div class="main-content">
+            <aside class="controls">
+                <h2 style="margin-bottom: 1rem; color: var(--julia-purple);">Parameters</h2>
+                
+                <div class="control-group">
+                    <label for="population">Population (N)</label>
+                    <input type="number" id="population" value="1000000" min="1000" max="10000000" step="1000">
+                </div>
+                
+                <div class="control-group">
+                    <label for="beta">Transmission Rate (β)
+                        <span style="float: right; font-weight: normal; font-size: 0.85rem;">R₀ = <span id="r0-display">7.0</span></span>
+                    </label>
+                    <input type="range" id="beta" min="0.1" max="1.0" step="0.01" value="0.5">
+                    <div class="value-display">
+                        <span>β = <span class="current-value" id="beta-value">0.50</span></span>
+                        <span style="font-size: 0.8rem;">contacts/day</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="sigma">Incubation Rate (σ)</label>
+                    <input type="range" id="sigma" min="0.05" max="0.5" step="0.01" value="0.196">
+                    <div class="value-display">
+                        <span>σ = <span class="current-value" id="sigma-value">0.20</span></span>
+                        <span style="font-size: 0.8rem;">~<span id="incubation-period">5.1</span> days</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="gamma">Recovery Rate (γ)</label>
+                    <input type="range" id="gamma" min="0.01" max="0.2" step="0.001" value="0.071">
+                    <div class="value-display">
+                        <span>γ = <span class="current-value" id="gamma-value">0.07</span></span>
+                        <span style="font-size: 0.8rem;">~<span id="infectious-period">14.1</span> days</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="initial-exposed">Initial Exposed</label>
+                    <input type="number" id="initial-exposed" value="100" min="1" max="10000">
+                </div>
+                
+                <div class="control-group">
+                    <label for="initial-infected">Initial Infected</label>
+                    <input type="number" id="initial-infected" value="10" min="1" max="10000">
+                </div>
+                
+                <div class="control-group">
+                    <label for="duration">Simulation Days</label>
+                    <input type="number" id="duration" value="365" min="30" max="730" step="30">
+                </div>
+                
+                <button class="btn-primary" onclick="updateSimulation()">🔄 Update Simulation</button>
+                <button class="btn-secondary" onclick="resetDefaults()">↺ Reset Defaults</button>
+                <button class="btn-export" onclick="exportData()">📥 Export CSV</button>
+                
+                <div class="info-text">
+                    <strong>Quick Presets:</strong><br>
+                    <button style="width: auto; padding: 0.5rem 1rem; margin: 0.25rem;" onclick="loadPreset('covid')">COVID-19</button>
+                    <button style="width: auto; padding: 0.5rem 1rem; margin: 0.25rem;" onclick="loadPreset('flu')">Influenza</button>
+                    <button style="width: auto; padding: 0.5rem 1rem; margin: 0.25rem;" onclick="loadPreset('measles')">Measles</button>
+                </div>
+            </aside>
+            
+            <main>
+                <div id="plot"></div>
+            </main>
+        </div>
+        
+        <div class="metrics-dashboard">
+            <div class="metric-card peak">
+                <div class="metric-label">Peak Infections</div>
+                <div class="metric-value" id="peak-infections">0</div>
+                <div class="metric-label" id="peak-day"></div>
+            </div>
+            <div class="metric-card r0">
+                <div class="metric-label">R₀ Value</div>
+                <div class="metric-value" id="r0-metric">0.0</div>
+                <div class="metric-label">Basic Reproduction Number</div>
+            </div>
+            <div class="metric-card affected">
+                <div class="metric-label">Total Affected</div>
+                <div class="metric-value" id="total-affected">0%</div>
+                <div class="metric-label">Of Population</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Epidemic Duration</div>
+                <div class="metric-value" id="epidemic-duration">0</div>
+                <div class="metric-label">Days</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // SEIR Model Solver
+        function solveSEIR() {
+            const N = parseInt(document.getElementById('population').value);
+            const beta = parseFloat(document.getElementById('beta').value);
+            const sigma = parseFloat(document.getElementById('sigma').value);
+            const gamma = parseFloat(document.getElementById('gamma').value);
+            const E0 = parseInt(document.getElementById('initial-exposed').value);
+            const I0 = parseInt(document.getElementById('initial-infected').value);
+            const days = parseInt(document.getElementById('duration').value);
+            
+            const dt = 0.1;
+            const steps = Math.floor(days / dt);
+            
+            // Initial conditions
+            const S = [N - E0 - I0];
+            const E = [E0];
+            const I = [I0];
+            const R = [0];
+            const t = [0];
+            
+            // Euler method integration
+            for (let i = 1; i < steps; i++) {
+                const lambda = beta * I[i-1] / N;
+                
+                const dS = -lambda * S[i-1];
+                const dE = lambda * S[i-1] - sigma * E[i-1];
+                const dI = sigma * E[i-1] - gamma * I[i-1];
+                const dR = gamma * I[i-1];
+                
+                S.push(Math.max(0, S[i-1] + dS * dt));
+                E.push(Math.max(0, E[i-1] + dE * dt));
+                I.push(Math.max(0, I[i-1] + dI * dt));
+                R.push(Math.max(0, R[i-1] + dR * dt));
+                t.push(i * dt);
+            }
+            
+            return { S, E, I, R, t, beta, gamma, N };
+        }
+        
+        function updateSimulation() {
+            const data = solveSEIR();
+            
+            // Update parameter displays
+            const beta = parseFloat(document.getElementById('beta').value);
+            const sigma = parseFloat(document.getElementById('sigma').value);
+            const gamma = parseFloat(document.getElementById('gamma').value);
+            
+            document.getElementById('beta-value').textContent = beta.toFixed(2);
+            document.getElementById('sigma-value').textContent = sigma.toFixed(2);
+            document.getElementById('gamma-value').textContent = gamma.toFixed(2);
+            document.getElementById('incubation-period').textContent = (1/sigma).toFixed(1);
+            document.getElementById('infectious-period').textContent = (1/gamma).toFixed(1);
+            
+            const R0 = beta / gamma;
+            document.getElementById('r0-display').textContent = R0.toFixed(1);
+            document.getElementById('r0-metric').textContent = R0.toFixed(2);
+            
+            // Calculate metrics
+            const peakI = Math.max(...data.I);
+            const peakDay = data.t[data.I.indexOf(peakI)];
+            const totalAffected = (data.R[data.R.length - 1] / data.N) * 100;
+            
+            // Find epidemic duration (when I drops below 1)
+            let duration = 0;
+            for (let i = data.I.length - 1; i >= 0; i--) {
+                if (data.I[i] > 1) {
+                    duration = data.t[i];
+                    break;
+                }
+            }
+            
+            document.getElementById('peak-infections').textContent = Math.round(peakI).toLocaleString();
+            document.getElementById('peak-day').textContent = `Day ${Math.round(peakDay)}`;
+            document.getElementById('total-affected').textContent = totalAffected.toFixed(1) + '%';
+            document.getElementById('epidemic-duration').textContent = Math.round(duration);
+            
+            // Plot
+            const traces = [
+                {
+                    x: data.t,
+                    y: data.S,
+                    name: 'Susceptible',
+                    line: { color: '#4063D8', width: 3 }
+                },
+                {
+                    x: data.t,
+                    y: data.E,
+                    name: 'Exposed',
+                    line: { color: '#9558B2', width: 3 }
+                },
+                {
+                    x: data.t,
+                    y: data.I,
+                    name: 'Infected',
+                    line: { color: '#CB3C33', width: 3 }
+                },
+                {
+                    x: data.t,
+                    y: data.R,
+                    name: 'Recovered',
+                    line: { color: '#389826', width: 3 }
+                }
+            ];
+            
+            const layout = {
+                title: 'SEIR Epidemic Dynamics',
+                xaxis: { title: 'Days' },
+                yaxis: { title: 'Number of People' },
+                hovermode: 'x unified',
+                showlegend: true,
+                legend: { x: 1, xanchor: 'right', y: 1 }
+            };
+            
+            Plotly.newPlot('plot', traces, layout, { responsive: true });
+        }
+        
+        function resetDefaults() {
+            document.getElementById('population').value = 1000000;
+            document.getElementById('beta').value = 0.5;
+            document.getElementById('sigma').value = 0.196;
+            document.getElementById('gamma').value = 0.071;
+            document.getElementById('initial-exposed').value = 100;
+            document.getElementById('initial-infected').value = 10;
+            document.getElementById('duration').value = 365;
+            updateSimulation();
+        }
+        
+        function loadPreset(disease) {
+            if (disease === 'covid') {
+                document.getElementById('beta').value = 0.5;
+                document.getElementById('sigma').value = 0.196;
+                document.getElementById('gamma').value = 0.071;
+            } else if (disease === 'flu') {
+                document.getElementById('beta').value = 0.4;
+                document.getElementById('sigma').value = 0.5;
+                document.getElementById('gamma').value = 0.333;
+            } else if (disease === 'measles') {
+                document.getElementById('beta').value = 1.2;
+                document.getElementById('sigma').value = 0.1;
+                document.getElementById('gamma').value = 0.1;
+            }
+            updateSimulation();
+        }
+        
+        function exportData() {
+            const data = solveSEIR();
+            let csv = 'Time,Susceptible,Exposed,Infected,Recovered\n';
+            
+            for (let i = 0; i < data.t.length; i++) {
+                csv += `${data.t[i].toFixed(2)},${data.S[i].toFixed(2)},${data.E[i].toFixed(2)},${data.I[i].toFixed(2)},${data.R[i].toFixed(2)}\n`;
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'seir_simulation.csv';
+            a.click();
+        }
+        
+        // Real-time updates on slider change
+        document.getElementById('beta').addEventListener('input', updateSimulation);
+        document.getElementById('sigma').addEventListener('input', updateSimulation);
+        document.getElementById('gamma').addEventListener('input', updateSimulation);
+        
+        // Initial simulation
+        updateSimulation();
+    </script>
+</body>
+</html>

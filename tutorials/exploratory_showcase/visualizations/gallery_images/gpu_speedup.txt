@@ -1,0 +1,1 @@
+Placeholder for gpu_speedup.png - will be generated when tutorials are run
