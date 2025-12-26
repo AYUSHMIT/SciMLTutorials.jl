@@ -1,0 +1,1 @@
+Placeholder for seir_model.png - will be generated when tutorials are run
