@@ -1,0 +1,484 @@
+/* SciML Exploratory Showcase - Main Stylesheet */
+/* Julia Theme Color Palette */
+:root {
+  --julia-purple: #9558B2;
+  --julia-green: #389826;
+  --julia-red: #CB3C33;
+  --julia-blue: #4063D8;
+  --text-dark: #2c3e50;
+  --text-light: #ecf0f1;
+  --bg-light: #f8f9fa;
+  --bg-dark: #1a1a1a;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  color: var(--text-dark);
+  background-color: var(--bg-light);
+}
+
+/* Hero Banner with Gradient & Animated Particles */
+.hero-banner {
+  background: linear-gradient(135deg, var(--julia-purple), var(--julia-blue));
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+  text-align: center;
+  padding: 2rem;
+}
+
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="30" fill="white" opacity="0.1">∂ƒ/∂t = Δƒ</text></svg>');
+  animation: float 60s infinite linear;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-50%, -50%); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+}
+
+.hero-cta {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  background-color: var(--julia-green);
+  color: white;
+  text-decoration: none;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.hero-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background-color: #2d7a1f;
+}
+
+/* Container & Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.section {
+  padding: 4rem 0;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--julia-purple);
+  text-align: center;
+}
+
+.section-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+/* Tutorial Cards with Glassmorphism */
+.tutorial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.tutorial-card {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(149, 88, 178, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.tutorial-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--julia-purple), var(--julia-blue));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.tutorial-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(149, 88, 178, 0.4);
+}
+
+.tutorial-card:hover::before {
+  transform: scaleX(1);
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--julia-purple);
+}
+
+.card-description {
+  color: #666;
+  line-height: 1.6;
+}
+
+.card-meta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #999;
+}
+
+/* Code Snippets with Syntax Highlighting */
+.code-snippet {
+  font-family: 'JuliaMono', 'Fira Code', 'Consolas', monospace;
+  background: rgba(0, 0, 0, 0.95);
+  border-left: 4px solid var(--julia-green);
+  padding: 1.5rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  position: relative;
+}
+
+.code-snippet code {
+  color: #f8f8f2;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.code-snippet .keyword {
+  color: var(--julia-purple);
+  font-weight: bold;
+}
+
+.code-snippet .string {
+  color: var(--julia-green);
+}
+
+.code-snippet .comment {
+  color: #888;
+  font-style: italic;
+}
+
+.code-snippet .function {
+  color: var(--julia-blue);
+}
+
+/* Copy Button */
+.copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--julia-blue);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.3s ease;
+}
+
+.copy-button:hover {
+  background-color: #2d4db8;
+}
+
+/* Learning Paths */
+.learning-paths {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.path-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: var(--card-shadow);
+  border-top: 4px solid var(--julia-purple);
+  transition: transform 0.3s ease;
+}
+
+.path-card:nth-child(2) {
+  border-top-color: var(--julia-blue);
+}
+
+.path-card:nth-child(3) {
+  border-top-color: var(--julia-green);
+}
+
+.path-card:nth-child(4) {
+  border-top-color: var(--julia-red);
+}
+
+.path-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.path-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.path-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.path-duration {
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.path-steps {
+  list-style: none;
+  padding-left: 0;
+}
+
+.path-steps li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.path-steps li:last-child {
+  border-bottom: none;
+}
+
+/* Stats Dashboard */
+.stats-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin: 3rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(149, 88, 178, 0.1), rgba(64, 99, 216, 0.1));
+  border-radius: 12px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--julia-purple);
+  display: block;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+/* Gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.gallery-item {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: white;
+}
+
+.gallery-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.gallery-item img,
+.gallery-item video {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-caption {
+  padding: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background-color: var(--julia-purple);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #7a3d8f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(149, 88, 178, 0.4);
+}
+
+.btn-secondary {
+  background-color: var(--julia-blue);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #2d4db8;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid var(--julia-purple);
+  color: var(--julia-purple);
+}
+
+.btn-outline:hover {
+  background-color: var(--julia-purple);
+  color: white;
+}
+
+/* Footer */
+.footer {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  padding: 3rem 0;
+  text-align: center;
+  margin-top: 4rem;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--text-light);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: var(--julia-purple);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0.25rem;
+}
+
+.badge-difficulty-beginner {
+  background-color: var(--julia-green);
+  color: white;
+}
+
+.badge-difficulty-intermediate {
+  background-color: var(--julia-blue);
+  color: white;
+}
+
+.badge-difficulty-advanced {
+  background-color: var(--julia-red);
+  color: white;
+}
+
+.badge-time {
+  background-color: #95a5a6;
+  color: white;
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.mt-3 { margin-top: 3rem; }
+.mb-1 { margin-bottom: 1rem; }
+.mb-2 { margin-bottom: 2rem; }
+.mb-3 { margin-bottom: 3rem; }

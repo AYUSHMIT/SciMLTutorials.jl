@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciML Exploratory Showcase - Interactive Explorer</title>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/styles/showcase.css">
+    <link rel="stylesheet" href="assets/styles/animations.css">
+    <link rel="stylesheet" href="assets/styles/responsive.css">
+    
+    <!-- Plotly for interactive plots -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <!-- Meta tags for sharing -->
+    <meta property="og:title" content="SciML Exploratory Showcase">
+    <meta property="og:description" content="Explore Scientific Machine Learning through beautiful visualizations and interactive tutorials">
+    <meta property="og:type" content="website">
+    
+    <style>
+        /* Additional inline styles for this page */
+        .filter-controls {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 2rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: var(--julia-purple);
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--julia-purple);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+        
+        .no-results p {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .viz-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 2rem 0;
+        }
+        
+        #plot-container {
+            width: 100%;
+            min-height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <div class="hero-content fade-in">
+            <h1 class="hero-title">SciML Exploratory Showcase</h1>
+            <p class="hero-subtitle">From Equations to Insights: The Scientific Machine Learning Journey</p>
+            <a href="#explore" class="hero-cta">Start Exploring ↓</a>
+        </div>
+    </div>
+
+    <!-- Stats Dashboard -->
+    <div class="container">
+        <div class="stats-dashboard fade-in-delay-1">
+            <div class="stat-item">
+                <span class="stat-value">125+</span>
+                <span class="stat-label">Tutorials</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">500+</span>
+                <span class="stat-label">Visualizations</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">50+</span>
+                <span class="stat-label">Performance Tips</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">10K+</span>
+                <span class="stat-label">GitHub Stars</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">200+</span>
+                <span class="stat-label">Contributors</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">130+</span>
+                <span class="stat-label">Solvers</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Visualization Demo -->
+    <div class="container section" id="demo">
+        <h2 class="section-title">Interactive Demo</h2>
+        <p class="section-subtitle">Experience the power of SciML with live visualizations</p>
+        
+        <div class="viz-container">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <button class="btn btn-primary" onclick="renderDemo('lorenz')">Lorenz Attractor</button>
+                <button class="btn btn-secondary" onclick="renderDemo('seir')">SEIR Model</button>
+                <button class="btn btn-outline" onclick="vizEngine.clear()">Clear</button>
+            </div>
+            <div id="plot-container"></div>
+        </div>
+    </div>
+
+    <!-- Tutorial Explorer -->
+    <div class="container section" id="explore">
+        <h2 class="section-title">Explore Tutorials</h2>
+        <p class="section-subtitle">Find the perfect tutorial for your learning journey</p>
+        
+        <!-- Filter Controls -->
+        <div class="filter-controls fade-in">
+            <div class="filter-group">
+                <label for="tutorial-search">🔍 Search</label>
+                <input type="text" id="tutorial-search" placeholder="Search tutorials...">
+            </div>
+            <div class="filter-group">
+                <label for="difficulty-filter">📊 Difficulty</label>
+                <select id="difficulty-filter">
+                    <option value="all">All Levels</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="category-filter">📁 Category</label>
+                <select id="category-filter">
+                    <option value="all">All Categories</option>
+                    <option value="sciml_journey">SciML Journey</option>
+                    <option value="visual_cookbook">Visual Cookbook</option>
+                    <option value="interactive_stories">Interactive Stories</option>
+                    <option value="creative">Creative</option>
+                    <option value="performance">Performance</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="duration-filter">⏱️ Duration</label>
+                <select id="duration-filter">
+                    <option value="all">Any Duration</option>
+                    <option value="10">≤ 10 minutes</option>
+                    <option value="30">10-30 minutes</option>
+                    <option value="60">> 30 minutes</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tutorials Grid -->
+        <div class="tutorial-grid" id="tutorials-container">
+            <!-- Dynamically populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Learning Paths -->
+    <div class="container section">
+        <h2 class="section-title">Choose Your Learning Path</h2>
+        <p class="section-subtitle">Curated journeys for different goals and backgrounds</p>
+        
+        <div class="learning-paths">
+            <div class="path-card reveal">
+                <div class="path-icon">🔬</div>
+                <h3 class="path-title">Applied Scientist</h3>
+                <div class="path-duration">⏱️ 6 hours</div>
+                <p>Master differential equation solving for your domain.</p>
+                <ul class="path-steps">
+                    <li>Five-Minute Tour</li>
+                    <li>Solver Comparison</li>
+                    <li>Domain Applications</li>
+                    <li>Parameter Estimation</li>
+                </ul>
+                <a href="#explore" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Start Path →</a>
+            </div>
+            
+            <div class="path-card reveal">
+                <div class="path-icon">🤖</div>
+                <h3 class="path-title">ML Practitioner</h3>
+                <div class="path-duration">⏱️ 8 hours</div>
+                <p>Combine physics and machine learning.</p>
+                <ul class="path-steps">
+                    <li>Neural ODEs</li>
+                    <li>Universal DEs</li>
+                    <li>Physics-Informed NNs</li>
+                    <li>Operator Learning</li>
+                </ul>
+                <a href="#explore" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Start Path →</a>
+            </div>
+            
+            <div class="path-card reveal">
+                <div class="path-icon">🏎️</div>
+                <h3 class="path-title">Performance Engineer</h3>
+                <div class="path-duration">⏱️ 4 hours</div>
+                <p>Optimize code for production.</p>
+                <ul class="path-steps">
+                    <li>Work-Precision Diagrams</li>
+                    <li>Profiling Tools</li>
+                    <li>GPU Acceleration</li>
+                    <li>Distributed Computing</li>
+                </ul>
+                <a href="#explore" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Start Path →</a>
+            </div>
+            
+            <div class="path-card reveal">
+                <div class="path-icon">🎨</div>
+                <h3 class="path-title">Creative Coder</h3>
+                <div class="path-duration">⏱️ 3 hours</div>
+                <p>Art, music, and games from math.</p>
+                <ul class="path-steps">
+                    <li>Chaos Gallery</li>
+                    <li>Music Generation</li>
+                    <li>Game Physics</li>
+                    <li>Generative Art</li>
+                </ul>
+                <a href="#explore" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Start Path →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Code Example -->
+    <div class="container section">
+        <h2 class="section-title">Get Started in 30 Seconds</h2>
+        <p class="section-subtitle">Install Julia and run your first SciML simulation</p>
+        
+        <div class="code-snippet">
+            <button class="copy-button" onclick="copyCode(this)">📋 Copy Code</button>
+            <code><span class="comment"># Solve the Lorenz attractor</span>
+<span class="keyword">using</span> DifferentialEquations, Plots
+
+<span class="keyword">function</span> <span class="function">lorenz!</span>(du, u, p, t)
+    σ, ρ, β = p
+    du[<span class="number">1</span>] = σ * (u[<span class="number">2</span>] - u[<span class="number">1</span>])
+    du[<span class="number">2</span>] = u[<span class="number">1</span>] * (ρ - u[<span class="number">3</span>]) - u[<span class="number">2</span>]
+    du[<span class="number">3</span>] = u[<span class="number">1</span>] * u[<span class="number">2</span>] - β * u[<span class="number">3</span>]
+<span class="keyword">end</span>
+
+u₀ = [<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>]
+p = (<span class="number">10.0</span>, <span class="number">28.0</span>, <span class="number">8/3</span>)
+tspan = (<span class="number">0.0</span>, <span class="number">100.0</span>)
+prob = <span class="function">ODEProblem</span>(lorenz!, u₀, tspan, p)
+sol = <span class="function">solve</span>(prob)
+
+<span class="function">plot</span>(sol, vars=(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>), 
+     label=<span class="string">"Lorenz Attractor"</span>,
+     lw=<span class="number">0.5</span>, c=<span class="string">:viridis</span>)</code>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <h3>SciML Exploratory Showcase</h3>
+            <p>From Equations to Insights</p>
+            <div class="footer-links">
+                <a href="https://sciml.ai">SciML.ai</a>
+                <a href="https://docs.sciml.ai">Documentation</a>
+                <a href="https://github.com/SciML">GitHub</a>
+                <a href="https://julialang.zulipchat.com">Community Chat</a>
+                <a href="README.md">Full README</a>
+            </div>
+            <p style="margin-top: 2rem; opacity: 0.7;">
+                Made with ❤️ by the SciML community
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="assets/js/visualization_engine.js"></script>
+    <script src="assets/js/tutorial_explorer.js"></script>
+    
+    <script>
+        // Initialize visualization engine
+        const vizEngine = new VisualizationEngine('plot-container');
+        
+        // Demo rendering functions
+        function renderDemo(type) {
+            if (type === 'lorenz') {
+                vizEngine.renderLorenzAttractor();
+            } else if (type === 'seir') {
+                vizEngine.renderSEIRModel({
+                    beta: 0.5,
+                    sigma: 0.2,
+                    gamma: 0.1,
+                    N: 1000,
+                    E0: 10,
+                    I0: 5,
+                    R0: 0,
+                    days: 200
+                });
+            }
+        }
+        
+        // Auto-render Lorenz on load
+        window.addEventListener('load', () => {
+            setTimeout(() => renderDemo('lorenz'), 1000);
+        });
+    </script>
+</body>
+</html>
